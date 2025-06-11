@@ -26,7 +26,11 @@ steps:
 
 # Upload JAR to JFrog Artifactory (fully correct upload URL)
 - script: |
+    echo "Listing JAR files:"
+    ls -l target/*.jar
+
     curl -v -u $(JFROG_USERNAME):$(JFROG_API_KEY) \
     -T target/*.jar \
     $(JFROG_URL)/local-libs-release/spring-boot-hello-world/
-  displayName: 'Upload to JFrog Artifactory (Verbose)'
+  displayName: 'Upload to JFrog Artifactory (Verbose with debug)'
+
