@@ -2,14 +2,12 @@ trigger:
 - main
 
 pool:
-  name: 'Default'
+  name: 'Default'  # your self-hosted agent pool
 
 variables:
   - group: jfrog
   - name: MAVEN_CACHE_FOLDER
     value: $(Pipeline.Workspace)/.m2/repository
-
-
 
 steps:
 
@@ -26,8 +24,7 @@ steps:
     jdkDirectory: '/usr/lib/jvm/java-17-openjdk-amd64'
     mavenOptions: '-Xmx3072m'
 
-
-# Upload JAR to JFrog Artifactory using curl
+# Upload JAR to JFrog Artifactory (CORRECTED REPO NAME)
 - script: |
-    curl -u $(JFROG_USERNAME):$(JFROG_API_KEY) -T target/*.jar $(JFROG_URL)/$(JFROG_REPO)/spring-boot-hello-world/
+    curl -u $(JFROG_USERNAME):$(JFROG_API_KEY) -T target/*.jar $(JFROG_URL)/local-libs-release/spring-boot-hello-world/
   displayName: 'Upload to JFrog Artifactory'
