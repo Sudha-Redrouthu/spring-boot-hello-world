@@ -1,6 +1,3 @@
-# Maven
-# Build your Java project and publish the .jar file as an artifact
-
 trigger:
 - main
 
@@ -8,29 +5,27 @@ pool:
   vmImage: 'ubuntu-latest'
 
 variables:
-  artifactName: 'drop'
+  - group: jfrog-variables
+  - name: MAVEN_CACHE_FOLDER
+    value: $(Pipeline.Workspace)/.m2/repository
+
 
 steps:
+
+# Checkout code
+- checkout: self
+
+# Build using Maven
 - task: Maven@3
   inputs:
     mavenPomFile: 'pom.xml'
-    mavenOptions: '-Xmx3072m'
-    javaHomeOption: 'JDKVersion'
-    jdkVersionOption: '1.11'
-    jdkArchitectureOption: 'x64'
+    goals: 'clean package'
     publishJUnitResults: true
-    testResultsFiles: '**/surefire-reports/TEST-*.xml'
-    goals: 'clean package -DskipTests=true'
+    javaHomeOption: 'JDKVersion'
+    jdkVersionOption: '17'
+    mavenOptions: '-Xmx3072m'
 
-# Copy the JAR to the staging directory
-- task: CopyFiles@2
-  inputs:
-    SourceFolder: '$(System.DefaultWorkingDirectory)/target'
-    Contents: '**/*.jar'
-    TargetFolder: '$(Build.ArtifactStagingDirectory)'
-
-# Publish the JAR as a build artifact
-- task: PublishBuildArtifacts@1
-  inputs:
-    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-    ArtifactName: '$(artifactName)'
+# Upload JAR to JFrog Artifactory using curl
+- script: |
+    curl -u $(JFROG_USERNAME):$(JFROG_API_KEY) -T target/*.jar $(JFROG_URL)/$(JFROG_REPO)/spring-boot-hello-world/
+  displayName: 'Upload to JFrog Artifactory'
